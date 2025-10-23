@@ -2,26 +2,24 @@ use std::{io, time::Duration};
 
 use crossterm::{
     event::{poll, read},
-    style::{ContentStyle, Stylize},
+    style::{ContentStyle, Stylize as _},
 };
-use rand::Rng;
 
 use riverraid::{
     entities::{Bullet, DeathCause, Enemy, Entity, EntityStatus, EntityType, Fuel, PlayerStatus},
     events::{
+        Event, LeaveAlone, WorldBuilder,
         handlers::{EventHandler, IntoEventHandler, TimerEventHandler},
         setup::IntoEventSetup,
         triggers::{IntoEventTrigger, WorldEventTrigger},
-        Event, LeaveAlone, WorldBuilder,
     },
     game::Game,
     timer::Timer,
-    world::{map::RiverMode, World, WorldStatus},
+    world::{World, WorldStatus, map::RiverMode},
 };
 
 fn is_the_chance(probability: f32) -> bool {
-    let mut rng = rand::thread_rng();
-    rng.gen::<f32>() < probability
+    rand::random::<f32>() < probability
 }
 
 fn keyboard_events(world: &mut World) -> io::Result<()> {
@@ -209,14 +207,14 @@ fn create_random_entities(world: &mut World) {
 
     if is_the_chance(world.fuel_spawn_probability.value) {
         world.entities.push(Entity::new(
-            (world.rng.gen_range(river_border.clone()), 0),
+            (rand::random_range(river_border.clone()), 0),
             Fuel,
         ));
     }
 
     if is_the_chance(world.enemy_spawn_probability.value) {
         world.entities.push(Entity::new(
-            (world.rng.gen_range(river_border), 0),
+            (rand::random_range(river_border), 0),
             Enemy::new(world.enemies_armor),
         ));
     }
@@ -293,12 +291,8 @@ pub fn setup_event_handlers(game: &mut Game) {
                 center_c: world.max_c() / 2,
             });
 
-            world.temp_popup(
-                "More enemies ...",
-                Duration::from_secs(1),
-                LeaveAlone,
-                ContentStyle::new().black().on_yellow(),
-            );
+            let s = ContentStyle::new().black().on_yellow();
+            world.temp_popup("More enemies ...", Duration::from_secs(1), LeaveAlone, s);
 
             world.add_timer(
                 Timer::new(Duration::from_secs(10), false),

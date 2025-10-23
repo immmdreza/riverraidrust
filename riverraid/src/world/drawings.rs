@@ -96,9 +96,9 @@ impl<'g> World<'g> {
 
 impl<'g> Game<'g> {
     pub fn clear_screen<'a>(
-        &'a self,
+        &self,
         stdout: &'a mut Stdout,
-    ) -> Result<&mut Stdout, std::io::Error> {
+    ) -> Result<&'a mut Stdout, std::io::Error> {
         stdout.clear_all()
     }
 

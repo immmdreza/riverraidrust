@@ -35,30 +35,30 @@ impl AsLocationTuple for u16 {
 }
 
 pub trait StdoutExt {
-    fn clear_all(&mut self) -> StdoutResult;
+    fn clear_all(&'_ mut self) -> StdoutResult<'_>;
 
-    fn move_cursor(&mut self, loc: impl AsLocationTuple) -> StdoutResult;
+    fn move_cursor(&'_ mut self, loc: impl AsLocationTuple) -> StdoutResult<'_>;
 
-    fn print(&mut self, display: impl Display) -> StdoutResult;
+    fn print(&'_ mut self, display: impl Display) -> StdoutResult<'_>;
 
-    fn draw(&mut self, loc: impl AsLocationTuple, display: impl Display) -> StdoutResult;
+    fn draw(&'_ mut self, loc: impl AsLocationTuple, display: impl Display) -> StdoutResult<'_>;
 }
 
 impl StdoutExt for Stdout {
-    fn move_cursor(&mut self, loc: impl AsLocationTuple) -> StdoutResult {
+    fn move_cursor(&'_ mut self, loc: impl AsLocationTuple) -> StdoutResult<'_> {
         let (c, l) = loc.as_loc_tuple();
         self.queue(MoveTo(c, l))
     }
 
-    fn draw(&mut self, loc: impl AsLocationTuple, display: impl Display) -> StdoutResult {
+    fn draw(&'_ mut self, loc: impl AsLocationTuple, display: impl Display) -> StdoutResult<'_> {
         self.move_cursor(loc)?.print(display)
     }
 
-    fn clear_all(&mut self) -> StdoutResult {
+    fn clear_all(&'_ mut self) -> StdoutResult<'_> {
         self.queue(Clear(crossterm::terminal::ClearType::All))
     }
 
-    fn print(&mut self, display: impl Display) -> StdoutResult {
+    fn print(&'_ mut self, display: impl Display) -> StdoutResult<'_> {
         self.queue(Print(display))
     }
 }

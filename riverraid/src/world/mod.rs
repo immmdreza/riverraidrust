@@ -5,7 +5,6 @@ use std::{
 };
 
 use crossterm::style::ContentStyle;
-use rand::{rngs::ThreadRng, thread_rng};
 use uuid::Uuid;
 
 use crate::{
@@ -45,7 +44,6 @@ pub struct World<'g> {
     pub fuel_spawn_probability: Restorable<f32>,
 
     pub entities: Vec<Entity>,
-    pub rng: ThreadRng, // Local rng for the whole world
 
     pub elapsed_time: usize,
     pub elapsed_loops: usize,
@@ -60,6 +58,7 @@ pub struct World<'g> {
 impl<'g> World<'g> {
     pub(crate) fn timer_elapsed(&self, key: &TimerKey) -> Option<bool> {
         let mut timers = self.timers.borrow_mut();
+
         let timer = match timers.get_mut(key) {
             Some(timer) => timer,
             None => {
@@ -100,7 +99,6 @@ impl<'g> World<'g> {
             map: Map::new(maxc, maxl, 5, maxc / 3, 2, 5),
             container: Container::new(0..maxl, 0..maxc),
             entities: Vec::new(),
-            rng: thread_rng(),
             timers: RefCell::new(HashMap::new()),
             signals: RefCell::new(HashSet::new()),
             custom_drawings: HashMap::new(),

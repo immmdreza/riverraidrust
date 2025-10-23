@@ -1,7 +1,5 @@
 use std::{cmp::Ordering, collections::VecDeque};
 
-use rand::{rngs::ThreadRng, Rng};
-
 use crate::{
     events::{
         handlers::{EventHandler, IntoEventHandler},
@@ -22,7 +20,7 @@ impl RiverPart {
         Self { width, center_c }
     }
 
-    pub fn from_map(map: &Map, rng: &mut ThreadRng) -> Self {
+    pub fn from_map(map: &Map) -> Self {
         use Ordering::*;
 
         match map.river_mode.value {
@@ -32,8 +30,8 @@ impl RiverPart {
                 max_center_diff,
             } => {
                 let mut river = RiverPart::new(
-                    rng.gen_range(min_width..max_width),
-                    rng.gen_range(0..map.max_c),
+                    rand::random_range(min_width..max_width),
+                    rand::random_range(0..map.max_c),
                 );
 
                 // Adjust newly generated center_c to be not so far
@@ -52,7 +50,7 @@ impl RiverPart {
                 width,
                 max_center_diff,
             } => {
-                let mut river = RiverPart::new(width, rng.gen_range(0..map.max_c));
+                let mut river = RiverPart::new(width, rand::random_range(0..map.max_c));
 
                 // Adjust newly generated center_c to be not so far
                 let front_center_c = map.front().unwrap().center_c;
@@ -70,7 +68,7 @@ impl RiverPart {
                 center_c,
                 min_width,
                 max_width,
-            } => RiverPart::new(rng.gen_range(min_width..max_width), center_c),
+            } => RiverPart::new(rand::random_range(min_width..max_width), center_c),
             RiverMode::ConstWidthAndCenter { width, center_c } => RiverPart::new(width, center_c),
         }
     }
@@ -161,8 +159,8 @@ impl Map {
         }
     }
 
-    fn generate_new_target(&self, rng: &mut ThreadRng) -> RiverPart {
-        RiverPart::from_map(self, rng)
+    fn generate_new_target(&self) -> RiverPart {
+        RiverPart::from_map(self)
     }
 
     pub fn is_in_river(&self, loc: impl AsLocationTuple) -> bool {
@@ -186,9 +184,9 @@ impl Map {
         }
     }
 
-    pub fn update(&mut self, rng: &mut ThreadRng) {
+    pub fn update(&mut self) {
         if self.next_point <= self.change_rate {
-            self.target_river = self.generate_new_target(rng);
+            self.target_river = self.generate_new_target();
             self.next_point = self.max_l;
         }
 
@@ -226,7 +224,7 @@ impl<'g> Event<'g> for MapUpdater {
     }
 
     fn handler(self) -> impl IntoEventHandler<'g> {
-        EventHandler::new(|world| world.map.update(&mut world.rng))
+        EventHandler::new(|world| world.map.update())
     }
 }
 
